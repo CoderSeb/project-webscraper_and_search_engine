@@ -1,0 +1,47 @@
+.App {
+  text-align: center;
+  margin: 0 auto;
+  padding: 1em;
+}
+
+.linkField {
+  width: 300px;
+}
+
+.scoreField {
+  width: 120px;
+}
+
+.contentField {
+  width: 120px;
+}
+
+.locationField {
+  width: 120px;
+}
+
+.pageRankField {
+  width: 120px;
+}
+
+.searchResultContainer {
+  width: 850px;
+  margin: 1rem auto;
+}
+
+.searchLevelSelect {
+  width: 120px;
+  margin-bottom: .5em;
+  float: right;
+}
+
+.searchInputContainer {
+  width: 850px;
+  margin: 1rem auto;
+  display: inline-block;
+}
+
+.searchButton {
+  width: 220px;
+  margin: 1rem;
+}
