@@ -26,7 +26,7 @@ public class PageService {
         new WebScraper("Cryptocurrency").runScraper();
         FileHandler fileHandler = new FileHandler();
         this.pageRepository = fileHandler.loadFiles("Cryptocurrency");
-        calculatePageRank(this.pageRepository.getPages());
+        calculatePageRank();
     }
 
     public int getSearchResults() {
@@ -175,12 +175,14 @@ public class PageService {
         }
     }
 
-    private void calculatePageRank(List<Page> allPages) {
+    private void calculatePageRank() {
+        System.out.println("Running page rank algorithm...");
+        List<Page> allPages = pageRepository.getPages();
         int maxIterations = 20;
         Map<Page, Double> pageRanks = new HashMap<>();
         for (int i = 0; i < maxIterations; i++) {
             for (Page page : allPages) {
-                pageRanks.put(page, iteratePageRank(allPages, page));
+                pageRanks.put(page, iteratePageRank(page, allPages));
             }
         }
         normalizePR(pageRanks);
@@ -188,9 +190,10 @@ public class PageService {
         for (Page page : pageRanks.keySet()) {
             page.setPageRank(pageRanks.get(page));
         }
+        pageRepository.setPages(allPages);
     }
 
-    private double iteratePageRank(List<Page> allPages, Page page) {
+    private double iteratePageRank(Page page, List<Page> allPages) {
         double pageRank = 0;
 
         for (Page currentPage : allPages) {

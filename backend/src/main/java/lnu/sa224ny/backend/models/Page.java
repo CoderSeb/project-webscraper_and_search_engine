@@ -34,7 +34,8 @@ public class Page {
     }
 
     public boolean hasLinkTo(String url) {
-        return links.contains(url);
+        String checkWith = "/wiki/" + url;
+        return links.contains(checkWith);
     }
 
     public void addLink(String link) {

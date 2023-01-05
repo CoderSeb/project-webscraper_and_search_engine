@@ -7,24 +7,24 @@ import lnu.sa224ny.backend.models.Page;
 import lnu.sa224ny.backend.repositories.PageRepository;
 import lombok.NoArgsConstructor;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 
 @NoArgsConstructor
 public class FileHandler {
+    private int fileCounter = 0;
     public void loadFilesToPages(String path, PageRepository pageRepository) {
         File directory = new File(path);
         System.out.println("Reading files in path " + path);
+        AtomicInteger loadedFiles = new AtomicInteger();
 
         if (directory.exists() && directory.isDirectory()) {
             Path directoryPath = Paths.get(path);
@@ -46,6 +46,7 @@ public class FileHandler {
                 exception.printStackTrace();
             }
         }
+        System.out.println(loadedFiles.get());
     }
 
     public PageRepository loadFiles(String entrySite) {
@@ -74,13 +75,19 @@ public class FileHandler {
             }
 
             if (!newWordFile.exists()) {
-                newWordFile.createNewFile();
-                System.out.println("File created: " + newWordFile.getName());
+                if (newWordFile.createNewFile()) {
+                    System.out.println("File created: " + newWordFile.getName());
+                } else {
+                    System.out.println("WARNING! File could not be created: " + newWordFile.getName());
+                }
             }
 
             if (!newLinkFile.exists()) {
-                newLinkFile.createNewFile();
-                System.out.println("File created: " + newLinkFile.getName());
+                if (newLinkFile.createNewFile()) {
+                    System.out.println("File created: " + newLinkFile.getName());
+                } else {
+                    System.out.println("WARNING! File could not be created: " + newLinkFile.getName());
+                }
             }
 
 
@@ -96,6 +103,7 @@ public class FileHandler {
             wordFileWriter.close();
 
             FileWriter linkFileWriter = new FileWriter(linkFilePath);
+            BufferedWriter bufferedWriter = new BufferedWriter(linkFileWriter);
             List<String> allLinks = new ArrayList<>();
             for (DomElement a : bodyNode.getElementsByTagName("a")) {
                 String currentHref = ((HtmlAnchor) a).getHrefAttribute();
@@ -104,11 +112,14 @@ public class FileHandler {
                         && !currentHref.contains(".jpg")
                         && !currentHref.contains(".svg")
                         && !allLinks.contains(currentHref)
+                        && !currentHref.contains(":")
+                        && !currentHref.contains(".")
                 ) {
                     allLinks.add(currentHref);
+                    bufferedWriter.write(currentHref);
+                    bufferedWriter.newLine();
                 }
             }
-            linkFileWriter.write(allLinks.toString());
             linkFileWriter.close();
 
         } catch (IOException e) {
@@ -124,13 +135,12 @@ public class FileHandler {
         }
         String allWords = page.asNormalizedText();
         allWords = allWords.replaceAll("[\\n\\r\\^\\$\\.\\|\\?\\*\\+\\{\\}\\[\\]\\(\\)]+", " ").trim();
-        String[] allActualWords = Pattern.compile("[a-zA-Z]+")
+        return Pattern.compile("[a-zA-Z]+")
                 .matcher(allWords)
                 .results()
                 .map(MatchResult::group)
                 .map(String::toLowerCase)
                 .toArray(String[]::new);
-        return allActualWords;
     }
 
 

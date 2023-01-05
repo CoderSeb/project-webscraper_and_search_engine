@@ -27,26 +27,39 @@ public class WebScraper {
         FileHandler fileHandler = new FileHandler();
         linkQueue.add("/wiki/" + entrySite);
         int counter = 0;
-        while (!linkQueue.isEmpty() && counter < 200) {
+        while (!linkQueue.isEmpty() && counter < 50) {
             String currentUrl = linkQueue.poll();
             System.out.println(counter + ": SCRAPING " + wikiBaseUrl + currentUrl);
             scrapedLinks.add(currentUrl);
             HtmlPage page = getPage(wikiBaseUrl + currentUrl);
-
-            fileHandler.saveToFiles(entrySite, currentUrl, page);
             DomElement bodyNode = page.getElementById("bodyContent");
 
-            for (DomElement a : bodyNode.getElementsByTagName("a")) {
-                String currentHref = ((HtmlAnchor)a).getHrefAttribute();
-                if (currentHref.startsWith("/wiki/")
-                        && !currentHref.contains(".jpg")
-                        && !currentHref.contains(".svg")) {
-                    if (!scrapedLinks.contains(currentHref)) {
-                        linkQueue.add(currentHref);
+
+
+            if (bodyNode.getElementsByTagName("a").size() != 0) {
+
+                int linkCount = 0;
+                for (DomElement a : bodyNode.getElementsByTagName("a")) {
+                    String currentHref = ((HtmlAnchor)a).getHrefAttribute();
+                    if (currentHref.startsWith("/wiki/")
+                            && !currentHref.contains(".jpg")
+                            && !currentHref.contains(".svg")
+                            && !currentHref.contains(":")
+                            && !currentHref.contains(".")) {
+                        linkCount++;
+                        if (!scrapedLinks.contains(currentHref)) {
+                            linkQueue.add(currentHref);
+                        }
                     }
                 }
+
+                if (linkCount > 0) {
+                    fileHandler.saveToFiles(entrySite, currentUrl, page);
+                    counter++;
+                }
+
             }
-            counter++;
+
         }
     }
 
