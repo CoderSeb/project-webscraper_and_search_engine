@@ -5,6 +5,8 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+src/files/wikipedia
+
 ### STS ###
 .apt_generated
 .classpath
