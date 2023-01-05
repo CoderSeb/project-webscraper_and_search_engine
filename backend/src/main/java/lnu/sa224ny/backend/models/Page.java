@@ -2,7 +2,6 @@ package lnu.sa224ny.backend.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -35,8 +34,7 @@ public class Page {
     }
 
     public boolean hasLinkTo(String url) {
-        String searchItem = "/wiki/" + url;
-        return links.contains(searchItem);
+        return links.contains(url);
     }
 
     public void addLink(String link) {

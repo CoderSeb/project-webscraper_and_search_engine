@@ -1,11 +1,15 @@
 package lnu.sa224ny.backend.utils;
 
+import com.gargoylesoftware.htmlunit.html.DomElement;
+import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import lnu.sa224ny.backend.models.Page;
 import lnu.sa224ny.backend.repositories.PageRepository;
 import lombok.NoArgsConstructor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,6 +17,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.MatchResult;
+import java.util.regex.Pattern;
 
 @NoArgsConstructor
 public class FileHandler {
@@ -42,15 +48,91 @@ public class FileHandler {
         }
     }
 
-    public PageRepository loadFiles() {
+    public PageRepository loadFiles(String entrySite) {
         PageRepository pageRepository = new PageRepository();
-        loadFilesToPages("src/files/wikipedia/Words/Games", pageRepository);
-        loadFilesToPages("src/files/wikipedia/Words/Programming", pageRepository);
-        addLinksToPages("src/files/wikipedia/Links/Games", pageRepository);
-        addLinksToPages("src/files/wikipedia/Links/Programming", pageRepository);
+        loadFilesToPages("src/files/wikipedia/Words/" + entrySite, pageRepository);
+
+        addLinksToPages("src/files/wikipedia/Links/" + entrySite, pageRepository);
 
         return pageRepository;
     }
+
+    public void saveToFiles(String entrySite, String pageUrl, HtmlPage page) {
+        String futureFileName = pageUrl.substring(6);
+        try {
+            String wordFilePath = "src/files/wikipedia/Words/" + entrySite + "/" + futureFileName;
+            String linkFilePath = "src/files/wikipedia/Links/" + entrySite + "/" + futureFileName;
+            File newWordFile = new File(wordFilePath);
+            File newLinkFile = new File(linkFilePath);
+
+            if (!newWordFile.getParentFile().exists()) {
+                newWordFile.getParentFile().mkdirs();
+            }
+
+            if (!newLinkFile.getParentFile().exists()) {
+                newLinkFile.getParentFile().mkdirs();
+            }
+
+            if (!newWordFile.exists()) {
+                newWordFile.createNewFile();
+                System.out.println("File created: " + newWordFile.getName());
+            }
+
+            if (!newLinkFile.exists()) {
+                newLinkFile.createNewFile();
+                System.out.println("File created: " + newLinkFile.getName());
+            }
+
+
+            DomElement bodyNode = page.getElementById("bodyContent");
+            StringBuilder allWords = new StringBuilder();
+            for (String word : extractWords(bodyNode)) {
+                allWords.append(" ").append(word);
+            }
+
+            FileWriter wordFileWriter = new FileWriter(wordFilePath);
+            wordFileWriter.write(allWords.toString());
+            System.out.println("Written words to file: " + newWordFile.getName());
+            wordFileWriter.close();
+
+            FileWriter linkFileWriter = new FileWriter(linkFilePath);
+            List<String> allLinks = new ArrayList<>();
+            for (DomElement a : bodyNode.getElementsByTagName("a")) {
+                String currentHref = ((HtmlAnchor) a).getHrefAttribute();
+
+                if (currentHref.startsWith("/wiki/")
+                        && !currentHref.contains(".jpg")
+                        && !currentHref.contains(".svg")
+                        && !allLinks.contains(currentHref)
+                ) {
+                    allLinks.add(currentHref);
+                }
+            }
+            linkFileWriter.write(allLinks.toString());
+            linkFileWriter.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    private String[] extractWords(DomElement page) {
+        if (page == null) {
+            return new String[0];
+        }
+        String allWords = page.asNormalizedText();
+        allWords = allWords.replaceAll("[\\n\\r\\^\\$\\.\\|\\?\\*\\+\\{\\}\\[\\]\\(\\)]+", " ").trim();
+        String[] allActualWords = Pattern.compile("[a-zA-Z]+")
+                .matcher(allWords)
+                .results()
+                .map(MatchResult::group)
+                .map(String::toLowerCase)
+                .toArray(String[]::new);
+        return allActualWords;
+    }
+
 
     private void addLinksToPages(String path, PageRepository pageRepository) {
         File directory = new File(path);

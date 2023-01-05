@@ -1,19 +1,19 @@
 package lnu.sa224ny.backend.services;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.stereotype.Service;
-
 import lnu.sa224ny.backend.models.Page;
+
 import lnu.sa224ny.backend.models.PageDTO;
 import lnu.sa224ny.backend.models.Scores;
 import lnu.sa224ny.backend.models.SearchLevel;
 import lnu.sa224ny.backend.repositories.PageRepository;
 import lnu.sa224ny.backend.utils.FileHandler;
+
+import lnu.sa224ny.backend.webscraper.WebScraper;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
+
+
 
 @Service
 public class PageService {
@@ -23,8 +23,10 @@ public class PageService {
     private double duration;
 
     public PageService() {
+        new WebScraper("Cryptocurrency").runScraper();
         FileHandler fileHandler = new FileHandler();
-        this.pageRepository = fileHandler.loadFiles();
+        this.pageRepository = fileHandler.loadFiles("Cryptocurrency");
+        calculatePageRank(this.pageRepository.getPages());
     }
 
     public int getSearchResults() {
@@ -35,7 +37,7 @@ public class PageService {
         return this.duration;
     }
 
-    public List<PageDTO> search(String query, SearchLevel searchLevel) {
+    public List<PageDTO> search(String query) {
         long startTime = System.nanoTime();
         String[] words = query.split(" ");
         int[] wordIds = new int[words.length];
@@ -49,20 +51,13 @@ public class PageService {
 
         List<PageDTO> result = new ArrayList<>();
 
-        switch (searchLevel) {
-            case LOW -> {
-                for (int i = 0; i < pageResult.size(); i++) {
-                    Page currentPage = pageResult.get(i);
-                    scores.content[i] = getFrequencyScore(currentPage, wordIds);
-                }
-                normalize(scores.content, false);
-            }
-            case MEDIUM -> calculateScores(wordIds, pageResult, scores);
-            case HIGH -> {
-                calculatePageRank(pageResult);
-                calculateScores(wordIds, pageResult, scores);
-            }
+        for (int i = 0; i < pageResult.size(); i++) {
+            Page currentPage = pageResult.get(i);
+            scores.content[i] = getFrequencyScore(currentPage, wordIds);
         }
+        normalize(scores.content, false);
+
+        calculateScores(wordIds, pageResult, scores);
 
         for (int i = 0; i < pageResult.size(); i++) {
 
@@ -72,8 +67,8 @@ public class PageService {
                 PageDTO pageDTO = new PageDTO();
                 pageDTO.link = currentPage.getUrl();
                 pageDTO.content = scores.content[i];
-                pageDTO.location = searchLevel != SearchLevel.LOW ? 0.8 * scores.location[i] : 0.0;
-                pageDTO.pageRank = searchLevel == SearchLevel.HIGH ? 0.5 * currentPage.getPageRank() : 0.0;
+                pageDTO.location = 0.8 * scores.location[i];
+                pageDTO.pageRank = 0.5 * currentPage.getPageRank();
                 pageDTO.score = pageDTO.content + pageDTO.location + pageDTO.pageRank;
                 result.add(pageDTO);
             }
