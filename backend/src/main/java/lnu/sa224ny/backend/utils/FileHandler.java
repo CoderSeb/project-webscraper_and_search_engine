@@ -20,7 +20,8 @@ import java.util.regex.Pattern;
 
 @NoArgsConstructor
 public class FileHandler {
-    private int fileCounter = 0;
+    private final int fileCounter = 0;
+
     public void loadFilesToPages(String path, PageRepository pageRepository) {
         File directory = new File(path);
         System.out.println("Reading files in path " + path);

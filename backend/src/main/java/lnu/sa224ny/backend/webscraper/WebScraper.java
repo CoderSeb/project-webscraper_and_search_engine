@@ -1,7 +1,9 @@
 package lnu.sa224ny.backend.webscraper;
 
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.*;
+import com.gargoylesoftware.htmlunit.html.DomElement;
+import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import lnu.sa224ny.backend.utils.FileHandler;
 
 import java.io.IOException;
@@ -35,12 +37,11 @@ public class WebScraper {
                 DomElement bodyNode = page.getElementById("bodyContent");
 
 
-
                 if (bodyNode.getElementsByTagName("a").size() != 0) {
 
                     int linkCount = 0;
                     for (DomElement a : bodyNode.getElementsByTagName("a")) {
-                        String currentHref = ((HtmlAnchor)a).getHrefAttribute();
+                        String currentHref = ((HtmlAnchor) a).getHrefAttribute();
                         if (currentHref.startsWith("/wiki/")
                                 && !currentHref.contains(".jpg")
                                 && !currentHref.contains(".svg")
@@ -61,11 +62,8 @@ public class WebScraper {
             }
 
 
-
         }
     }
-
-
 
 
     private HtmlPage getPage(String url) {

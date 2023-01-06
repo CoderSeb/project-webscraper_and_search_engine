@@ -1,18 +1,14 @@
 package lnu.sa224ny.backend.services;
 
 import lnu.sa224ny.backend.models.Page;
-
 import lnu.sa224ny.backend.models.PageDTO;
 import lnu.sa224ny.backend.models.Scores;
-import lnu.sa224ny.backend.models.SearchLevel;
 import lnu.sa224ny.backend.repositories.PageRepository;
 import lnu.sa224ny.backend.utils.FileHandler;
-
 import lnu.sa224ny.backend.webscraper.WebScraper;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-
 
 
 @Service
@@ -51,12 +47,6 @@ public class PageService {
 
         List<PageDTO> result = new ArrayList<>();
 
-        for (int i = 0; i < pageResult.size(); i++) {
-            Page currentPage = pageResult.get(i);
-            scores.content[i] = getFrequencyScore(currentPage, wordIds);
-        }
-        normalize(scores.content, false);
-
         calculateScores(wordIds, pageResult, scores);
 
         for (int i = 0; i < pageResult.size(); i++) {
@@ -67,7 +57,7 @@ public class PageService {
                 PageDTO pageDTO = new PageDTO();
                 pageDTO.link = currentPage.getUrl();
                 pageDTO.content = Double.isNaN(scores.content[i]) ? 0.0 : scores.content[i];
-                pageDTO.location = Double.isNaN(0.8 * scores.location[i]) ? 0.0 : 0.8 * scores.location[i];
+                pageDTO.location = Double.isNaN(scores.location[i]) ? 0.0 : 0.8 * scores.location[i];
                 pageDTO.pageRank = 0.5 * currentPage.getPageRank();
                 pageDTO.score = pageDTO.content + pageDTO.location + pageDTO.pageRank;
                 result.add(pageDTO);
