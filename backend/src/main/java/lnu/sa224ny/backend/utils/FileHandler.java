@@ -61,8 +61,8 @@ public class FileHandler {
     public void saveToFiles(String entrySite, String pageUrl, HtmlPage page) {
         String futureFileName = pageUrl.substring(6);
         try {
-            String wordFilePath = "src/files/wikipedia/Words/" + entrySite + "/" + futureFileName;
-            String linkFilePath = "src/files/wikipedia/Links/" + entrySite + "/" + futureFileName;
+            String wordFilePath = "src//files//wikipedia//Words//" + entrySite + "//" + futureFileName;
+            String linkFilePath = "src//files//wikipedia//Links//" + entrySite + "//" + futureFileName;
             File newWordFile = new File(wordFilePath);
             File newLinkFile = new File(linkFilePath);
 
@@ -74,9 +74,20 @@ public class FileHandler {
                 newLinkFile.getParentFile().mkdirs();
             }
 
+            DomElement bodyNode = page.getElementById("bodyContent");
+
             if (!newWordFile.exists()) {
                 if (newWordFile.createNewFile()) {
                     System.out.println("File created: " + newWordFile.getName());
+                    StringBuilder allWords = new StringBuilder();
+                    for (String word : extractWords(bodyNode)) {
+                        allWords.append(" ").append(word);
+                    }
+
+                    FileWriter wordFileWriter = new FileWriter(wordFilePath);
+                    wordFileWriter.write(allWords.toString());
+                    System.out.println("Written words to file: " + newWordFile.getName());
+                    wordFileWriter.close();
                 } else {
                     System.out.println("WARNING! File could not be created: " + newWordFile.getName());
                 }
@@ -85,42 +96,29 @@ public class FileHandler {
             if (!newLinkFile.exists()) {
                 if (newLinkFile.createNewFile()) {
                     System.out.println("File created: " + newLinkFile.getName());
+                    FileWriter linkFileWriter = new FileWriter(linkFilePath);
+                    BufferedWriter bufferedWriter = new BufferedWriter(linkFileWriter);
+                    List<String> allLinks = new ArrayList<>();
+                    for (DomElement a : bodyNode.getElementsByTagName("a")) {
+                        String currentHref = ((HtmlAnchor) a).getHrefAttribute();
+
+                        if (currentHref.startsWith("/wiki/")
+                                && !currentHref.contains(".jpg")
+                                && !currentHref.contains(".svg")
+                                && !allLinks.contains(currentHref)
+                                && !currentHref.contains(":")
+                                && !currentHref.contains(".")
+                        ) {
+                            allLinks.add(currentHref);
+                            bufferedWriter.write(currentHref);
+                            bufferedWriter.newLine();
+                        }
+                    }
+                    linkFileWriter.close();
                 } else {
                     System.out.println("WARNING! File could not be created: " + newLinkFile.getName());
                 }
             }
-
-
-            DomElement bodyNode = page.getElementById("bodyContent");
-            StringBuilder allWords = new StringBuilder();
-            for (String word : extractWords(bodyNode)) {
-                allWords.append(" ").append(word);
-            }
-
-            FileWriter wordFileWriter = new FileWriter(wordFilePath);
-            wordFileWriter.write(allWords.toString());
-            System.out.println("Written words to file: " + newWordFile.getName());
-            wordFileWriter.close();
-
-            FileWriter linkFileWriter = new FileWriter(linkFilePath);
-            BufferedWriter bufferedWriter = new BufferedWriter(linkFileWriter);
-            List<String> allLinks = new ArrayList<>();
-            for (DomElement a : bodyNode.getElementsByTagName("a")) {
-                String currentHref = ((HtmlAnchor) a).getHrefAttribute();
-
-                if (currentHref.startsWith("/wiki/")
-                        && !currentHref.contains(".jpg")
-                        && !currentHref.contains(".svg")
-                        && !allLinks.contains(currentHref)
-                        && !currentHref.contains(":")
-                        && !currentHref.contains(".")
-                ) {
-                    allLinks.add(currentHref);
-                    bufferedWriter.write(currentHref);
-                    bufferedWriter.newLine();
-                }
-            }
-            linkFileWriter.close();
 
         } catch (IOException e) {
             e.printStackTrace();

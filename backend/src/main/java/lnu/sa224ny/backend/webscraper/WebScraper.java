@@ -2,7 +2,6 @@ package lnu.sa224ny.backend.webscraper;
 
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.*;
-import lnu.sa224ny.backend.models.Page;
 import lnu.sa224ny.backend.utils.FileHandler;
 
 import java.io.IOException;
@@ -27,38 +26,41 @@ public class WebScraper {
         FileHandler fileHandler = new FileHandler();
         linkQueue.add("/wiki/" + entrySite);
         int counter = 0;
-        while (!linkQueue.isEmpty() && counter < 50) {
+        while (!linkQueue.isEmpty() && counter < 200) {
             String currentUrl = linkQueue.poll();
-            System.out.println(counter + ": SCRAPING " + wikiBaseUrl + currentUrl);
-            scrapedLinks.add(currentUrl);
-            HtmlPage page = getPage(wikiBaseUrl + currentUrl);
-            DomElement bodyNode = page.getElementById("bodyContent");
+            if (!scrapedLinks.contains(currentUrl)) {
+                System.out.println(counter + ": SCRAPING " + wikiBaseUrl + currentUrl);
+                scrapedLinks.add(currentUrl);
+                HtmlPage page = getPage(wikiBaseUrl + currentUrl);
+                DomElement bodyNode = page.getElementById("bodyContent");
 
 
 
-            if (bodyNode.getElementsByTagName("a").size() != 0) {
+                if (bodyNode.getElementsByTagName("a").size() != 0) {
 
-                int linkCount = 0;
-                for (DomElement a : bodyNode.getElementsByTagName("a")) {
-                    String currentHref = ((HtmlAnchor)a).getHrefAttribute();
-                    if (currentHref.startsWith("/wiki/")
-                            && !currentHref.contains(".jpg")
-                            && !currentHref.contains(".svg")
-                            && !currentHref.contains(":")
-                            && !currentHref.contains(".")) {
-                        linkCount++;
-                        if (!scrapedLinks.contains(currentHref)) {
-                            linkQueue.add(currentHref);
+                    int linkCount = 0;
+                    for (DomElement a : bodyNode.getElementsByTagName("a")) {
+                        String currentHref = ((HtmlAnchor)a).getHrefAttribute();
+                        if (currentHref.startsWith("/wiki/")
+                                && !currentHref.contains(".jpg")
+                                && !currentHref.contains(".svg")
+                                && !currentHref.contains(":")
+                                && !currentHref.contains(".")) {
+                            linkCount++;
+                            if (!scrapedLinks.contains(currentHref)) {
+                                linkQueue.add(currentHref);
+                            }
                         }
                     }
-                }
 
-                if (linkCount > 0) {
-                    fileHandler.saveToFiles(entrySite, currentUrl, page);
-                    counter++;
+                    if (linkCount > 0) {
+                        fileHandler.saveToFiles(entrySite, currentUrl, page);
+                        counter++;
+                    }
                 }
-
             }
+
+
 
         }
     }

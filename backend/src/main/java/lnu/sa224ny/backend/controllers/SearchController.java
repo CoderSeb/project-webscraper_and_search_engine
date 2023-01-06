@@ -1,7 +1,6 @@
 package lnu.sa224ny.backend.controllers;
 
 
-import lnu.sa224ny.backend.models.SearchQuery;
 import lnu.sa224ny.backend.models.SearchResult;
 import lnu.sa224ny.backend.services.PageService;
 import lombok.AllArgsConstructor;
@@ -21,8 +20,8 @@ public class SearchController {
     private PageService pageService;
 
     @PostMapping("/api/search")
-    public SearchResult search(@RequestBody SearchQuery searchQuery) {
-        String result = searchQuery.query.replaceAll("\"", "");
+    public SearchResult search(@RequestBody String searchQuery) {
+        String result = searchQuery.replaceAll("\"", "");
         SearchResult searchResult = new SearchResult();
         searchResult.setResults(pageService.search(result));
         searchResult.setNumberOfResults(pageService.getSearchResults());

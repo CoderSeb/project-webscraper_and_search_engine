@@ -66,8 +66,8 @@ public class PageService {
 
                 PageDTO pageDTO = new PageDTO();
                 pageDTO.link = currentPage.getUrl();
-                pageDTO.content = scores.content[i];
-                pageDTO.location = 0.8 * scores.location[i];
+                pageDTO.content = Double.isNaN(scores.content[i]) ? 0.0 : scores.content[i];
+                pageDTO.location = Double.isNaN(0.8 * scores.location[i]) ? 0.0 : 0.8 * scores.location[i];
                 pageDTO.pageRank = 0.5 * currentPage.getPageRank();
                 pageDTO.score = pageDTO.content + pageDTO.location + pageDTO.pageRank;
                 result.add(pageDTO);
