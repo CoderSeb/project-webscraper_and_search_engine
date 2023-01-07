@@ -1,5 +1,16 @@
 # Project
 
+## Instructions to run
+
+```bash
+# Start the application
+docker compose up
+
+
+# Tear down
+docker compose down --rmi all --volumes
+```
+
 In the project, you decide what you want to work on! There are several pre-defined projects you can select from. Choose one of them!
 
 <!----------------------------------------------------------------------------->
