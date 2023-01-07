@@ -1,15 +1,19 @@
 package lnu.sa224ny.backend.services;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+
 import lnu.sa224ny.backend.models.Page;
 import lnu.sa224ny.backend.models.PageDTO;
 import lnu.sa224ny.backend.models.Scores;
 import lnu.sa224ny.backend.repositories.PageRepository;
 import lnu.sa224ny.backend.utils.FileHandler;
 import lnu.sa224ny.backend.webscraper.WebScraper;
-import org.springframework.stereotype.Service;
-
-import java.util.*;
-
 
 @Service
 public class PageService {
@@ -19,7 +23,7 @@ public class PageService {
     private double duration;
 
     public PageService() {
-        new WebScraper("Cryptocurrency").runScraper();
+        new WebScraper("Cryptocurrency").runScraper(500);
         FileHandler fileHandler = new FileHandler();
         this.pageRepository = fileHandler.loadFiles("Cryptocurrency");
         calculatePageRank();

@@ -23,12 +23,12 @@ public class WebScraper {
         this.scrapedLinks = new ArrayList<>();
     }
 
-    public void runScraper() {
+    public void runScraper(int noOfSites) {
         String wikiBaseUrl = "https://en.wikipedia.org";
         FileHandler fileHandler = new FileHandler();
         linkQueue.add("/wiki/" + entrySite);
         int counter = 0;
-        while (!linkQueue.isEmpty() && counter < 200) {
+        while (!linkQueue.isEmpty() && counter < noOfSites) {
             String currentUrl = linkQueue.poll();
             if (!scrapedLinks.contains(currentUrl)) {
                 System.out.println(counter + ": SCRAPING " + wikiBaseUrl + currentUrl);

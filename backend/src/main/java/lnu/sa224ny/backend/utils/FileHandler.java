@@ -14,18 +14,15 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 
 @NoArgsConstructor
 public class FileHandler {
-    private final int fileCounter = 0;
 
     public void loadFilesToPages(String path, PageRepository pageRepository) {
         File directory = new File(path);
         System.out.println("Reading files in path " + path);
-        AtomicInteger loadedFiles = new AtomicInteger();
 
         if (directory.exists() && directory.isDirectory()) {
             Path directoryPath = Paths.get(path);
@@ -47,7 +44,6 @@ public class FileHandler {
                 exception.printStackTrace();
             }
         }
-        System.out.println(loadedFiles.get());
     }
 
     public PageRepository loadFiles(String entrySite) {
@@ -133,8 +129,8 @@ public class FileHandler {
             return new String[0];
         }
         String allWords = page.asNormalizedText();
-        allWords = allWords.replaceAll("[\\n\\r\\^\\$\\.\\|\\?\\*\\+\\{\\}\\[\\]\\(\\)]+", " ").trim();
-        return Pattern.compile("[a-zA-Z]+")
+        allWords = allWords.replaceAll("[\\n\\r\\^\\$\\|\\?\\*\\+\\{\\}\\[\\]\\(\\)]+", " ").trim();
+        return Pattern.compile("[a-zA-Z0-9]+")
                 .matcher(allWords)
                 .results()
                 .map(MatchResult::group)
@@ -169,7 +165,6 @@ public class FileHandler {
                 exception.printStackTrace();
             }
         }
-
     }
 
     public List<String> readFile(String path) throws FileNotFoundException {

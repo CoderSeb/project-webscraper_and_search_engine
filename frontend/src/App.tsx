@@ -40,7 +40,7 @@ function App() {
   }
   return (
     <div className='App'>
-      <h1>Assignment 3 - Search Engine</h1>
+      <h1>Project - Webscraper/SearchEngine</h1>
       <div className='searchContainer'>
         <div className='searchInputContainer'>
           <Form.Control
@@ -73,7 +73,7 @@ function App() {
               {results &&
                 results.results.map((result, index) => (
                   <tr key={index}>
-                    <td className='linkField'>{result.link}</td>
+                    <td className='linkField'><a href={`https://en.wikipedia.org/wiki/${result.link}`} target="_blank">{result.link}</a></td>
                     <td className='scoreField'>{result.score.toFixed(2)}</td>
                     <td className='contentField'>
                       {result.content.toFixed(2)}
